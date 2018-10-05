@@ -12,3 +12,8 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/Sage-Bionetworks/neurolincsscoring
 BugReports: https://github.com/Sage-Bionetworks/neurolincsscoring/issues
+Imports: 
+    knitr,
+    dplyr,
+    synapser,
+    tibble
