@@ -16,3 +16,5 @@ Imports:
     dplyr,
     synapser,
     tibble
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.0
