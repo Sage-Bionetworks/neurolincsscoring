@@ -1,3 +1,5 @@
+[![Travis build status](https://travis-ci.org/Sage-Bionetworks/neurolincsscoring.svg?branch=master)](https://travis-ci.org/Sage-Bionetworks/neurolincsscoring)
+
 # neurolincsscoring
 
 The goal of neurolincsscoring is to score tracking submissions against a curated gold standard.
