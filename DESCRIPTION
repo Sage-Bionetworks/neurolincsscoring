@@ -20,4 +20,5 @@ Additional_repositories:
   https://sage-bionetworks.github.io/ran
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.0
-
+Suggests: 
+    testthat
