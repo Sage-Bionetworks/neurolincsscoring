@@ -1,3 +1,5 @@
+#!/usr/bin/env RScript
+
 library(synapser)
 library(tidyverse)
 library(ggplot2)
