@@ -62,8 +62,12 @@ trackingResults <- trackingResults %>%
   anti_join(trackingResults, .,
             by=c("Experiment", "Well", "ObjectTrackID"))
 
+message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
+
 curatedData <- curatedData %>%
   filter(Experiment %in% unique(trackingResults$Experiment))
+
+message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
 
 ## ----merge-curated-and-tracked-------------------------------------------
 merged <- full_join(curatedData,
