@@ -2,7 +2,7 @@
 syn_get_curated_data <- function(id) {
   query <- glue::glue("select * from {id}")
   d <- synapser::synTableQuery(query)$filepath %>%
-    readr::read_csv() %>%
+    readr::read_csv(col_types=readr::cols()) %>%
     assertr::chain_start() %>%
     assertr::verify(assertr::has_all_names("Experiment",
                                            "Well",
@@ -50,7 +50,7 @@ syn_get_tracking_metadata <- function(id) {
 syn_get_tracking_submission_file <- function(id) {
   o <- synapser::synGet(id)
 
-  trackingResults <- readr::read_csv(o$path) %>%
+  trackingResults <- readr::read_csv(o$path, col_types=readr::cols()) %>%
     assertr::verify(assertr::has_all_names("Experiment", "ObjectLabelsFound",
                                            "ObjectTrackID",  "Well", "TimePoint"))
   return(trackingResults)

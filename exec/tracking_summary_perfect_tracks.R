@@ -36,12 +36,14 @@ curatedData <- curatedDataRaw %>%
 curatedData <- curatedData %>%
   count(Experiment, Well, TimePoint, ObjectLabelsFound, ObjectTrackID) %>%
   filter(n > 1) %>%
-  anti_join(curatedData, .)
+  anti_join(curatedData, .,
+            by=c("Experiment", "Well", "TimePoint", "ObjectLabelsFound", "ObjectTrackID"))
 
 curatedData <- curatedData %>%
   count(Experiment, Well, TimePoint, XCoordinate, YCoordinate) %>%
   filter(n > 1) %>%
-  anti_join(curatedData, .)
+  anti_join(curatedData, .,
+            by=c("Experiment", "Well", "TimePoint", "XCoordinate", "YCoordinate"))
 
 ## ----remove-after-t-zero-------------------------------------------------
 curatedData <- curatedData %>%
@@ -49,14 +51,16 @@ curatedData <- curatedData %>%
   summarize(mintime = min(TimePoint)) %>%
   ungroup() %>%
   filter(mintime > 0) %>%
-  anti_join(curatedData, .)
+  anti_join(curatedData, .,
+            by=c("Experiment", "Well", "ObjectTrackID"))
 
 trackingResults <- trackingResults %>%
   group_by(Experiment, Well, ObjectTrackID) %>%
   summarize(mintime = min(TimePoint)) %>%
   ungroup() %>%
   filter(mintime > 0) %>%
-  anti_join(trackingResults, .)
+  anti_join(trackingResults, .,
+            by=c("Experiment", "Well", "ObjectTrackID"))
 
 curatedData <- curatedData %>%
   filter(Experiment %in% unique(trackingResults$Experiment))
