@@ -2,7 +2,6 @@
 
 suppressPackageStartupMessages(library(synapser))
 suppressPackageStartupMessages(library(tidyverse))
-library(ggplot2)
 library(neurolincsscoring)
 suppressPackageStartupMessages(library(optparse))
 
