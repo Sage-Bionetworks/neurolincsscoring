@@ -72,9 +72,9 @@ message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
 merged <- full_join(curatedData,
                     trackingResults,
                     by = c("Experiment" = "Experiment",
-                         "Well" = "Well",
-                         "TimePoint" = "TimePoint",
-                         "ObjectLabelsFound" = "ObjectLabelsFound"))
+                           "Well" = "Well",
+                           "TimePoint" = "TimePoint",
+                           "ObjectLabelsFound" = "ObjectLabelsFound"))
 
 merged <- merged %>%
   mutate(matched = ObjectTrackID.x == ObjectTrackID.y)
