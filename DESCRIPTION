@@ -18,6 +18,7 @@ Imports:
     tibble,
     assertr,
     magrittr,
+    getopt,
     optparse
 Additional_repositories:
   https://sage-bionetworks.github.io/ran
