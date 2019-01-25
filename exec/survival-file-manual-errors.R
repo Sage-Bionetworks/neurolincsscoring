@@ -10,7 +10,11 @@ experiments <- list(list(experiment="LINCS092016B", id="syn17089669"),
                     # list(experiment="AB7-SOD1-KW4-WTC11-Survival-exp3", id="syn17089671")
                     )
 
-original_data <- readr::read_csv("neurolincsdreamchallenge/workflows/unique-objects-workflow/unique-objects.csv")
+censored_wells_id <- 'syn11709601'
+censored_wells <- readr::read_csv(synTableQuery('select * from syn11709601')$filepath) %>%
+  select(-ROW_ID, -ROW_VERSION)
+
+original_data <- readr::read_csv("/home/kdaily/repositories/neurolincsdreamchallenge/workflows/unique-objects-workflow/unique-objects.csv")
 
 experiment <- experiments[[1]]
 
@@ -53,4 +57,5 @@ find_manual_errors <- function(experiment, original_data) {
 }
 
 foo <- purrr::map_df(experiments, find_manual_errors, original_data=original_data)
+foo <- anti_join(foo, censored_wells)
 readr::write_csv(foo, "potential-manual-errors.csv")
