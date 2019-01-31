@@ -57,4 +57,5 @@ find_manual_errors <- function(experiment, original_data) {
 
 foo <- purrr::map_df(experiments, find_manual_errors, original_data=original_data)
 foo <- anti_join(foo, censored_wells)
-readr::write_csv(foo, "potential-manual-errors.csv")
+readr::write_csv(foo, "/tmp/potential-manual-errors.csv")
+synStore(File("/tmp/potential-manual-errors.csv", parentId="syn17079347"))
