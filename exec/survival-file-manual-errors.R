@@ -3,12 +3,11 @@ library(tidyverse)
 
 synLogin()
 
-experiments <- list(list(experiment="LINCS092016B", id="syn17089669"),
-                    list(experiment="KS-AB-iMN-TDP43-Survival", id="syn17089673"),
-                    list(experiment="AB-CS47iTDP-Survival", id="syn17139503"),
-                    list(experiment="LINCS062016A", id="syn17089659")
-                    # list(experiment="AB7-SOD1-KW4-WTC11-Survival-exp3", id="syn17089671")
-                    )
+experiment_table_id <- 'syn11817859'
+experiment_table <- readr::read_csv(synTableQuery(sprintf('select Experiment,survival_file from %s WHERE survival_file is not NULL', experiment_table_id))$filepath) %>%
+  select(-ROW_ID, -ROW_VERSION, experiment=Experiment, id=survival_file)
+
+experiments <- purrr::pmap(experiment_table, list)
 
 censored_wells_id <- 'syn11709601'
 censored_wells <- readr::read_csv(synTableQuery('select * from syn11709601')$filepath) %>%
