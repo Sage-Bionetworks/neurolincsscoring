@@ -3,3 +3,7 @@
 language: R
 sudo: false
 cache: packages
+
+env:
+  global:
+    - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
