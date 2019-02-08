@@ -19,7 +19,11 @@ Imports:
     assertr,
     magrittr,
     getopt,
-    optparse
+    optparse,
+    readr,
+    stringr,
+    tidyr,
+    glue
 Additional_repositories:
   https://sage-bionetworks.github.io/ran
 Roxygen: list(markdown = TRUE)
