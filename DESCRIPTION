@@ -2,10 +2,10 @@ Package: neurolincsscoring
 Title: Score Tracking Against Curated NeuroLINCS Data
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Kenneth",
+           family = "Daily",
            role = c("aut", "cre"),
-           email = "first.last@example.com")
+           email = "kenneth.daily@sagebionetworks.org")
 Description: Scores tracking files against manually curated NeuroLINCS data.
 License: Apache License (>= 2.0)
 Encoding: UTF-8
