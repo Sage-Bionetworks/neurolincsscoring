@@ -33,6 +33,7 @@ syn_get_image_masks <- function(id) {
   return(d)
 }
 
+#' @export
 syn_get_tracking_metadata <- function(id) {
   query <- glue::glue("select * from {id}")
   d <- synTableQuery(query)$asDataFrame() %>%
