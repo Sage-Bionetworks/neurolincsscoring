@@ -8,6 +8,8 @@ foo <- synLogin()
 
 manuallyCuratedId <- 'syn11378063'
 
+curatedDataRaw <- neurolincsscoring::syn_get_curated_data(manuallyCuratedId)
+
 curatedData <- curatedDataRaw %>%
   filter(!is.na(ObjectTrackID), !Lost_Tracking) %>%
   distinct()
@@ -32,3 +34,6 @@ curatedData <- curatedData %>%
   filter(mintime > 0) %>%
   anti_join(curatedData, .,
             by=c("Experiment", "Well", "ObjectTrackID"))
+
+# ## store the data
+# table <- Table()
