@@ -47,6 +47,9 @@ syn_get_tracking_metadata <- function(id) {
 }
 
 #' Get a submitted tracking file
+#'
+#' @param id Synapse ID of a tracking CSV file.
+#'
 #' @export
 syn_get_tracking_submission_file <- function(id) {
   o <- synapser::synGet(id)

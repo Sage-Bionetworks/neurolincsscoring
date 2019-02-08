@@ -32,6 +32,7 @@ score_perfect_tracks <- function(d) {
 #' Get censored wells from the censored well table.
 #'
 #' @param id Synapse ID of a censored well table.
+#' @param ... Additional parameters to synTableQuery
 #'
 #' @return A data frame of censored well information.
 #' @export
