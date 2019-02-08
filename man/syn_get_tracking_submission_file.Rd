@@ -6,6 +6,9 @@
 \usage{
 syn_get_tracking_submission_file(id)
 }
+\arguments{
+\item{id}{Synapse ID of a tracking CSV file.}
+}
 \description{
 Get a submitted tracking file
 }
