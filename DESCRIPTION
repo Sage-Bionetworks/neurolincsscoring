@@ -23,7 +23,9 @@ Imports:
     readr,
     stringr,
     tidyr,
-    glue
+    glue,
+    jsonlite,
+    assertthat
 Additional_repositories:
   https://sage-bionetworks.github.io/ran
 Roxygen: list(markdown = TRUE)

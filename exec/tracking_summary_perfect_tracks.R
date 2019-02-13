@@ -4,12 +4,18 @@ suppressPackageStartupMessages(library(synapser))
 suppressPackageStartupMessages(library(tidyverse))
 library(neurolincsscoring)
 suppressPackageStartupMessages(library(optparse))
+library(jsonlite)
 
 option_list <- list(
   make_option(c("--synapse_file_id"), type = "character",
               help = "File ID containing tracking information.",
               dest = "synapse_file_id",
-              metavar = "synapseid")
+              metavar = "synapseid"),
+  make_option(c("--json"), type = "logical",
+              action = "store_true",
+              help = "Write output in JSON format.",
+              dest = "json",
+              default=FALSE)
 )
 
 opt <- parse_args(OptionParser(option_list = option_list))
@@ -20,6 +26,9 @@ manuallyCuratedId <- 'syn11378063'
 
 ## ----get-tracking-results, message = FALSE---------------------------------
 trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$synapse_file_id)
+
+testexpts <- assertthat::assert_that(length(unique(trackingResults$Experiment)) == 1,
+                                     msg = "Did not find a single experiment in tracking file.")
 
 ## ----get-curated-data----------------------------------------------------
 curatedDataRaw <- neurolincsscoring::syn_get_curated_data(manuallyCuratedId)
@@ -82,10 +91,12 @@ merged <- merged %>%
 merged$matched[is.na(merged$matched)] <- FALSE
 
 ## ----percentagetable-expt-well-object------------------------------------
-res <- neurolincsscoring::score_perfect_tracks(merged) %>%
-  mutate(submitted_file=opt$synapse_file_id) %>%
-  select(submitted_file, everything())
+res <- neurolincsscoring::score_perfect_tracks(merged)
 
-cat(readr::format_csv(res))
+assertthat::assert_that(nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
 
-
+if (opt$json) {
+  cat(jsonlite::toJSON(as.list(res), auto_unbox = TRUE))
+} else {
+  cat(readr::format_csv(res))
+}
