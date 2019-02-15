@@ -1,10 +1,12 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages(library(synapser))
-suppressPackageStartupMessages(library(tidyverse))
-library(neurolincsscoring)
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(assertthat))
+suppressPackageStartupMessages(library(readr))
 suppressPackageStartupMessages(library(optparse))
-library(jsonlite)
+suppressPackageStartupMessages(library(jsonlite))
+suppressPackageStartupMessages(library(neurolincsscoring))
 
 option_list <- list(
   make_option(c("--tracking_file"), type = "character",
@@ -47,30 +49,30 @@ trackingResults <- trackingResults %>%
   assertr::verify(trackingResults$Experiment %in% curatedData$Experiment)
 
 trackingResults <- trackingResults %>%
-  group_by(Experiment, Well, ObjectTrackID) %>%
-  summarize(mintime = min(TimePoint)) %>%
-  ungroup() %>%
-  filter(mintime > 0) %>%
-  anti_join(trackingResults, .,
-            by=c("Experiment", "Well", "ObjectTrackID"))
+  dplyr::group_by(Experiment, Well, ObjectTrackID) %>%
+  dplyr::summarize(mintime = min(TimePoint)) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(mintime > 0) %>%
+  dplyr::anti_join(trackingResults, .,
+                   by=c("Experiment", "Well", "ObjectTrackID"))
 
 message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
 
 curatedData <- curatedData %>%
-  filter(Experiment %in% unique(trackingResults$Experiment))
+  dplyr::filter(Experiment %in% unique(trackingResults$Experiment))
 
 message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
 
 ## ----merge-curated-and-tracked-------------------------------------------
-merged <- full_join(curatedData,
-                    trackingResults,
-                    by = c("Experiment" = "Experiment",
-                           "Well" = "Well",
-                           "TimePoint" = "TimePoint",
-                           "ObjectLabelsFound" = "ObjectLabelsFound"))
+merged <- dplyr::full_join(curatedData,
+                           trackingResults,
+                           by = c("Experiment" = "Experiment",
+                                  "Well" = "Well",
+                                  "TimePoint" = "TimePoint",
+                                  "ObjectLabelsFound" = "ObjectLabelsFound"))
 
 merged <- merged %>%
-  mutate(matched = ObjectTrackID.x == ObjectTrackID.y)
+  dplyr::mutate(matched = ObjectTrackID.x == ObjectTrackID.y)
 
 merged$matched[is.na(merged$matched)] <- FALSE
 
