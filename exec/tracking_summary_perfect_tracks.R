@@ -38,13 +38,13 @@ testexpts <- assertthat::assert_that(length(unique(trackingResults$Experiment)) 
 
 ## ----get-curated-data----------------------------------------------------
 if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
-  curatedDataRaw <- neurolincsscoring::syn_get_curated_data(opt$curated_file)
+  curatedData <- neurolincsscoring::syn_get_curated_data(opt$curated_file)
 } else {
-  curatedDataRaw <- neurolincsscoring::read_curated_data(opt$curated_file)
+  curatedData <- neurolincsscoring::read_curated_data(opt$curated_file)
 }
 
 trackingResults <- trackingResults %>%
-  assertr::verify(trackingResults$Experiment %in% curatedDataRaw$Experiment)
+  assertr::verify(trackingResults$Experiment %in% curatedData$Experiment)
 
 trackingResults <- trackingResults %>%
   group_by(Experiment, Well, ObjectTrackID) %>%
