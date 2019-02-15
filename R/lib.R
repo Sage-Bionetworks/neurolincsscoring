@@ -1,3 +1,5 @@
+#' Find minimum timepoint per group_col.
+#'
 #' @export
 find_min_timepoints <- function(d, group_col="Experiment", timepoint_col="TimePoint") {
   d %>%
@@ -5,6 +7,8 @@ find_min_timepoints <- function(d, group_col="Experiment", timepoint_col="TimePo
     dplyr::summarise(minTimePoint=min(TimePoint))
 }
 
+#' Score perfect tracks
+#'
 #' @export
 score_perfect_tracks <- function(d) {
   # Some ObjectTrackID.x values are NA, meaning they were tracked automatically but not manually curated.
