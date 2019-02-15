@@ -46,32 +46,6 @@ if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
 trackingResults <- trackingResults %>%
   assertr::verify(trackingResults$Experiment %in% curatedDataRaw$Experiment)
 
-curatedData <- curatedDataRaw %>%
-  filter(!is.na(ObjectTrackID), !Lost_Tracking) %>%
-  distinct() # This shouldn't be required
-
-# This shouldn't be required
-curatedData <- curatedData %>%
-  count(Experiment, Well, TimePoint, ObjectLabelsFound, ObjectTrackID) %>%
-  filter(n > 1) %>%
-  anti_join(curatedData, .,
-            by=c("Experiment", "Well", "TimePoint", "ObjectLabelsFound", "ObjectTrackID"))
-
-curatedData <- curatedData %>%
-  count(Experiment, Well, TimePoint, XCoordinate, YCoordinate) %>%
-  filter(n > 1) %>%
-  anti_join(curatedData, .,
-            by=c("Experiment", "Well", "TimePoint", "XCoordinate", "YCoordinate"))
-
-## ----remove-after-t-zero-------------------------------------------------
-curatedData <- curatedData %>%
-  group_by(Experiment, Well, ObjectTrackID) %>%
-  summarize(mintime = min(TimePoint)) %>%
-  ungroup() %>%
-  filter(mintime > 0) %>%
-  anti_join(curatedData, .,
-            by=c("Experiment", "Well", "ObjectTrackID"))
-
 trackingResults <- trackingResults %>%
   group_by(Experiment, Well, ObjectTrackID) %>%
   summarize(mintime = min(TimePoint)) %>%
