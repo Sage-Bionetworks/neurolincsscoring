@@ -37,7 +37,7 @@ testexpts <- assertthat::assert_that(length(unique(trackingResults$Experiment)) 
                                      msg = "Did not find a single experiment in tracking file.")
 
 ## ----get-curated-data----------------------------------------------------
-if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
+if (stringr::str_detect(opt$curated_file, "^syn.*")) {
   curatedData <- neurolincsscoring::syn_get_curated_data(opt$curated_file)
 } else {
   curatedData <- neurolincsscoring::read_curated_data(opt$curated_file)
