@@ -7,10 +7,13 @@ suppressPackageStartupMessages(library(optparse))
 library(jsonlite)
 
 option_list <- list(
-  make_option(c("--synapse_file_id"), type = "character",
-              help = "File ID containing tracking information.",
-              dest = "synapse_file_id",
-              metavar = "synapseid"),
+  make_option(c("--tracking_file"), type = "character",
+              help = "Path or Synapse ID to tracking file.",
+              dest = "tracking_file"),
+  make_option(c("--curated_data_table"), type = "character",
+              help = "Path or ID containing curated data.",
+              dest = "curated_file",
+              default="syn18344955"),
   make_option(c("--json"), type = "logical",
               action = "store_true",
               help = "Write output in JSON format.",
@@ -22,16 +25,23 @@ opt <- parse_args(OptionParser(option_list = option_list))
 
 foo <- capture.output(synLogin())
 
-manuallyCuratedId <- 'syn11378063'
 
 ## ----get-tracking-results, message = FALSE---------------------------------
-trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$synapse_file_id)
+if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
+  trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$tracking_file)
+} else {
+  trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$tracking_file)
+}
 
 testexpts <- assertthat::assert_that(length(unique(trackingResults$Experiment)) == 1,
                                      msg = "Did not find a single experiment in tracking file.")
 
 ## ----get-curated-data----------------------------------------------------
-curatedDataRaw <- neurolincsscoring::syn_get_curated_data(manuallyCuratedId)
+if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
+  curatedDataRaw <- neurolincsscoring::syn_get_curated_data(opt$curated_file)
+} else {
+  curatedDataRaw <- neurolincsscoring::read_curated_data(opt$curated_file)
+}
 
 trackingResults <- trackingResults %>%
   assertr::verify(trackingResults$Experiment %in% curatedDataRaw$Experiment)

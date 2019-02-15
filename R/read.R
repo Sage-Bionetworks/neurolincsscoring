@@ -1,8 +1,13 @@
 #' @export
 syn_get_curated_data <- function(id) {
   query <- glue::glue("select * from {id}")
-  d <- synapser::synTableQuery(query)$filepath %>%
-    readr::read_csv(col_types=readr::cols()) %>%
+  path <- synapser::synTableQuery(query)$filepath
+  d <- read_curated_data(path)
+}
+
+#' @export
+read_curated_data <- function(path) {
+  d <- readr::read_csv(path, col_types=readr::cols()) %>%
     assertr::chain_start() %>%
     assertr::verify(assertr::has_all_names("Experiment",
                                            "Well",
@@ -54,7 +59,18 @@ syn_get_tracking_metadata <- function(id) {
 syn_get_tracking_submission_file <- function(id) {
   o <- synapser::synGet(id)
 
-  trackingResults <- readr::read_csv(o$path, col_types=readr::cols()) %>%
+  trackingResults <- read_tracking_submission_file(o$path)
+
+  return(trackingResults)
+}
+
+#' Read a submitted tracking file
+#'
+#' @param path File path to a tracking CSV file.
+#'
+#' @export
+read_tracking_submission_file <- function(path) {
+  trackingResults <- readr::read_csv(path, col_types=readr::cols()) %>%
     assertr::verify(assertr::has_all_names("Experiment", "ObjectLabelsFound",
                                            "ObjectTrackID",  "Well", "TimePoint"))
   return(trackingResults)
