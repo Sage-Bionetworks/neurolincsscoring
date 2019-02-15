@@ -1,4 +1,4 @@
-FROM rocker/tidyverse:3.4.0
+FROM rocker/tidyverse:latest
 
 RUN apt-get update -y
 RUN apt-get install -y dpkg-dev zlib1g-dev libssl-dev libffi-dev
