@@ -79,7 +79,7 @@ merged$matched[is.na(merged$matched)] <- FALSE
 ## ----percentagetable-expt-well-object------------------------------------
 res <- neurolincsscoring::score_perfect_tracks(merged)
 
-assertthat::assert_that(nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
+check_n_rows <- assertthat::assert_that(nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
 
 if (opt$json) {
   cat(jsonlite::toJSON(as.list(res), auto_unbox = TRUE))
