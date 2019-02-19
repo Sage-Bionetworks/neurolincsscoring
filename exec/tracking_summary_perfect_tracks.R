@@ -45,7 +45,6 @@ if (syn_tracking_file | syn_curated_file) {
   foo <- capture.output(synLogin())
 }
 
-
 ## ----get-tracking-results, message = FALSE---------------------------------
 trackingResults <- get_tracking_file_fxn(opt$tracking_file)
 
