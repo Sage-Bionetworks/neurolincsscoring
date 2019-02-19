@@ -25,42 +25,43 @@ option_list <- list(
 
 opt <- parse_args(OptionParser(option_list = option_list))
 
-foo <- capture.output(synLogin())
+if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
+  syn_tracking_file <- TRUE
+  get_tracking_file_fxn <- neurolincsscoring::syn_get_tracking_submission_file
+} else {
+  syn_tracking_file <- FALSE
+  get_tracking_file_fxn <- neurolincsscoring::read_tracking_submission_file
+}
+
+if (stringr::str_detect(opt$curated_file, "^syn.*")) {
+  syn_curated_file <- TRUE
+  get_curated_data_fxn <- neurolincsscoring::syn_get_curated_data
+} else {
+  syn_curated_file <- FALSE
+  get_curated_data_fxn <- neurolincsscoring::read_curated_data
+}
+
+if (syn_tracking_file | syn_curated_file) {
+  foo <- capture.output(synLogin())
+}
 
 
 ## ----get-tracking-results, message = FALSE---------------------------------
-if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
-  trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$tracking_file)
-} else {
-  trackingResults <- neurolincsscoring::syn_get_tracking_submission_file(opt$tracking_file)
-}
+trackingResults <- get_tracking_file_fxn(opt$tracking_file)
 
 testexpts <- assertthat::assert_that(length(unique(trackingResults$Experiment)) == 1,
                                      msg = "Did not find a single experiment in tracking file.")
 
 ## ----get-curated-data----------------------------------------------------
-if (stringr::str_detect(opt$curated_file, "^syn.*")) {
-  curatedData <- neurolincsscoring::syn_get_curated_data(opt$curated_file)
-} else {
-  curatedData <- neurolincsscoring::read_curated_data(opt$curated_file)
-}
+curatedData <- get_curated_data_fxn(opt$curated_file)
 
 trackingResults <- trackingResults %>%
   assertr::verify(trackingResults$Experiment %in% curatedData$Experiment)
 
-trackingResults <- trackingResults %>%
-  dplyr::group_by(Experiment, Well, ObjectTrackID) %>%
-  dplyr::summarize(mintime = min(TimePoint)) %>%
-  dplyr::ungroup() %>%
-  dplyr::filter(mintime > 0) %>%
-  dplyr::anti_join(trackingResults, .,
-                   by=c("Experiment", "Well", "ObjectTrackID"))
-
-message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
-
 curatedData <- curatedData %>%
   dplyr::filter(Experiment %in% unique(trackingResults$Experiment))
 
+message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
 message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
 
 ## ----merge-curated-and-tracked-------------------------------------------
