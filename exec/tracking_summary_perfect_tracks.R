@@ -15,12 +15,12 @@ option_list <- list(
   make_option(c("--curated_data_table"), type = "character",
               help = "Path or ID containing curated data.",
               dest = "curated_file",
-              default="syn18344955"),
+              default = "syn18344955"),
   make_option(c("--json"), type = "logical",
               action = "store_true",
               help = "Write output in JSON format.",
               dest = "json",
-              default=FALSE)
+              default = FALSE)
 )
 
 opt <- parse_args(OptionParser(option_list = option_list))
