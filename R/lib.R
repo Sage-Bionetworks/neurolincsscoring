@@ -1,7 +1,8 @@
 #' Find minimum timepoint per group_col.
 #'
 #' @export
-find_min_timepoints <- function(d, group_col="Experiment", timepoint_col="TimePoint") {
+find_min_timepoints <- function(d, group_col = "Experiment",
+                                timepoint_col = "TimePoint") {
   d %>%
     dplyr::group_by(Experiment) %>%
     dplyr::summarise(minTimePoint = min(TimePoint))
@@ -41,8 +42,9 @@ score_perfect_tracks <- function(d) {
 #'
 #' @return A data frame of censored well information.
 #' @export
-get_censored_wells <- function(id='syn11709601', ...) {
-  censored_wells <- readr::read_csv(synapser::synTableQuery(sprintf(query = 'select * from %s', id), ...)$filepath)
+get_censored_wells <- function(id = "syn11709601", ...) {
+  censored_wells <- readr::read_csv(synapser::synTableQuery(sprintf(query = "select * from %s", id), ...)$filepath)
+  return(censored_wells)
 }
 
 #' Identify object labels that are not present in image masks.
@@ -55,7 +57,8 @@ get_censored_wells <- function(id='syn11709601', ...) {
 #' @return A data frame summary of the objects not present.
 #' @export
 find_manual_errors <- function(experiment, objects_data_frame) {
-  orig <- objects_data_frame %>% dplyr::filter(Experiment == experiment$experiment)
+  orig <- objects_data_frame %>%
+    dplyr::filter(Experiment == experiment$experiment)
 
   f <- synapser::synGet(experiment$id)
   d <- readr::read_csv(f$path, col_types = readr::cols(.default = "c"))
