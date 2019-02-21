@@ -8,7 +8,7 @@ find_min_timepoints <- function(d, group_col = "Experiment",
     dplyr::summarise(minTimePoint = min(TimePoint))
 }
 
-#' Score perfect tracks
+#' Score perfect tracks across all wells of an experiment.
 #'
 #' @export
 score_perfect_tracks <- function(d) {
@@ -31,6 +31,32 @@ score_perfect_tracks <- function(d) {
                      total = dplyr::n()) %>%
     dplyr::mutate(percentage = `perfect tracks` / total) %>%
     dplyr::arrange(Experiment)
+
+  return(res)
+}
+
+#' Score perfect tracks per well within an experiment.
+#'
+#' @export
+score_perfect_tracks_per_well <- function(d) {
+  # Some ObjectTrackID.x values are NA, meaning they were tracked automatically but not manually curated.
+  # These are treated as mismatches.
+  d <- d %>% assertr::verify(assertr::has_all_names("Experiment", "Well",
+                                                    "ObjectTrackID.x", "matched"))
+  tblExptWellObj <- d %>%
+    dplyr::group_by(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::summarize(matches = sum(matched, na.rm = TRUE),
+                     total = dplyr::n()) %>%
+    dplyr::mutate(percentage = matches / total) %>%
+    dplyr::arrange(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(errors = total - matches)
+
+  res <- tblExptWellObj %>%
+    dplyr::group_by(Experiment, Well) %>%
+    dplyr::summarize(`perfect tracks` = sum(percentage == 1), total = n()) %>%
+    dplyr::mutate(percentage  = `perfect tracks` / total) %>%
+    arrange(Experiment, Well)
 
   return(res)
 }
