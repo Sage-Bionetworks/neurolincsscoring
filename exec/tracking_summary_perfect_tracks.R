@@ -16,6 +16,11 @@ option_list <- list(
               help = "Path or ID containing curated data.",
               dest = "curated_file",
               default = "syn18344955"),
+  make_option(c("--per_well"), type = "logical",
+              action = "store_true",
+              help = "Report results per well instead of across all wells.",
+              dest = "json",
+              default = FALSE)
   make_option(c("--json"), type = "logical",
               action = "store_true",
               help = "Write output in JSON format.",
@@ -77,10 +82,12 @@ merged <- merged %>%
 merged$matched[is.na(merged$matched)] <- FALSE
 
 ## ----percentagetable-expt-well-object------------------------------------
-res <- neurolincsscoring::score_perfect_tracks(merged)
-
-check_n_rows <- assertthat::assert_that(nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
-
+if (opt$per_well) {
+  res <- neurolincsscoring::score_perfect_tracks_per_well(merged)
+} else {
+  res <- neurolincsscoring::score_perfect_tracks(merged)
+  check_n_rows <- assertthat::assert_that(nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
+}
 if (opt$json) {
   cat(jsonlite::toJSON(as.list(res), auto_unbox = TRUE))
 } else {
