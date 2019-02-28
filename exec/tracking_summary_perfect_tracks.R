@@ -19,8 +19,8 @@ option_list <- list(
   make_option(c("--per_well"), type = "logical",
               action = "store_true",
               help = "Report results per well instead of across all wells.",
-              dest = "json",
-              default = FALSE)
+              dest = "per_well",
+              default = FALSE),
   make_option(c("--json"), type = "logical",
               action = "store_true",
               help = "Write output in JSON format.",
@@ -29,6 +29,8 @@ option_list <- list(
 )
 
 opt <- parse_args(OptionParser(option_list = option_list))
+
+message(opt)
 
 if (stringr::str_detect(opt$tracking_file, "^syn.*")) {
   syn_tracking_file <- TRUE
