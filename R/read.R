@@ -1,7 +1,7 @@
 #' @export
 syn_get_curated_data <- function(id) {
   query <- glue::glue("select * from {id}")
-  path <- synapser::synTableQuery(query)$filepath
+  path <- suppressMessages(synapser::synTableQuery(query)$filepath)
   return(read_curated_data(path))
 }
 
@@ -32,7 +32,7 @@ read_curated_data <- function(path) {
 #' @export
 syn_get_image_masks <- function(id) {
   query <- glue::glue("select id,Experiment,Well,PID,parentId from {id}")
-  d <- synapser::synTableQuery(query)$asDataFrame() %>%
+  d <- suppressMessages(synapser::synTableQuery(query))$asDataFrame() %>%
     tibble::as_tibble() %>%
     select(-ROW_ID, -ROW_VERSION, -ROW_ETAG)
   return(d)
@@ -41,7 +41,7 @@ syn_get_image_masks <- function(id) {
 #' @export
 syn_get_tracking_metadata <- function(id) {
   query <- glue::glue("select * from {id}")
-  d <- synapser::synTableQuery(query)$asDataFrame() %>%
+  d <- suppressMessages(synapser::synTableQuery(query))$asDataFrame() %>%
     tibble::as_tibble() %>%
     select(-ROW_ID, -ROW_VERSION) %>%
     dplyr::mutate(CurationFiles = as.logical(CurationFiles),
