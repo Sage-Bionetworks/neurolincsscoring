@@ -77,7 +77,10 @@ read_curated_table <- function(curated_table_path, read) {
 }
 
 cat_invalid_reasons <- function(invalid_reasons) {
-  cat(jsonlite::toJSON(list(status = "INVALID", invalid_reasons = invalid_reasons)))
+  cat(jsonlite::toJSON(list(
+    status = "INVALID",
+    invalid_reasons = invalid_reasons,
+    results = NULL)))
 }
 
 score_tracking_results <- function(trackingResults, curatedData, per_well) {
