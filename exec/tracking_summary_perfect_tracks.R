@@ -8,6 +8,7 @@ suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(jsonlite))
 suppressPackageStartupMessages(library(neurolincsscoring))
 
+
 read_args <- function() {
   option_list <- list(
     make_option(c("--tracking_file"), type = "character",
