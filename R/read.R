@@ -8,18 +8,6 @@ syn_get_curated_data <- function(id) {
 #' @export
 read_curated_data <- function(path) {
   d <- readr::read_csv(path, col_types = readr::cols()) %>%
-    assertr::chain_start() %>%
-    assertr::verify(assertr::has_all_names("Experiment",
-                                           "Well",
-                                           "ObjectLabelsFound",
-                                           "ObjectTrackID",
-                                           "TimePoint",
-                                           "ObjectCount",
-                                           "Mistracked",
-                                           "Out_of_Focus",
-                                           "Lost_Tracking",
-                                           "XCoordinate",
-                                           "YCoordinate")) %>%
     dplyr::mutate(XCoordinate = as.numeric(XCoordinate),
                   YCoordinate = as.numeric(YCoordinate),
                   Mistracked = as.logical(Mistracked),
@@ -71,7 +59,5 @@ syn_get_tracking_submission_file <- function(id) {
 #' @export
 read_tracking_submission_file <- function(path) {
   trackingResults <- readr::read_csv(path, col_types = readr::cols()) %>%
-    assertr::verify(assertr::has_all_names("Experiment", "ObjectLabelsFound",
-                                           "ObjectTrackID",  "Well", "TimePoint"))
   return(trackingResults)
 }
