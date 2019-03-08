@@ -1,10 +1,15 @@
+#' Find minimum timepoint per group_col.
+#'
 #' @export
-find_min_timepoints <- function(d, group_col="Experiment", timepoint_col="TimePoint") {
+find_min_timepoints <- function(d, group_col = "Experiment",
+                                timepoint_col = "TimePoint") {
   d %>%
     dplyr::group_by(Experiment) %>%
-    dplyr::summarise(minTimePoint=min(TimePoint))
+    dplyr::summarise(minTimePoint = min(TimePoint))
 }
 
+#' Score perfect tracks across all wells of an experiment.
+#'
 #' @export
 score_perfect_tracks <- function(d) {
   # Some ObjectTrackID.x values are NA, meaning they were tracked automatically but not manually curated.
@@ -13,18 +18,45 @@ score_perfect_tracks <- function(d) {
                                                     "ObjectTrackID.x", "matched"))
   tblExptWellObj <- d %>%
     dplyr::group_by(Experiment, Well, ObjectTrackID.x) %>%
-    dplyr::summarize(matches = sum(matched, na.rm=TRUE),
+    dplyr::summarize(matches = sum(matched, na.rm = TRUE),
                      total = dplyr::n()) %>%
-    dplyr::mutate(percentage = matches/total) %>%
+    dplyr::mutate(percentage = matches / total) %>%
     dplyr::arrange(Experiment, Well, ObjectTrackID.x) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(errors = total - matches)
 
   res <- tblExptWellObj %>%
     dplyr::group_by(Experiment) %>%
-    dplyr::summarize(`perfect tracks`=sum(percentage == 1), total=dplyr::n()) %>%
-    dplyr::mutate(percentage=`perfect tracks`/total) %>%
+    dplyr::summarize(`perfect tracks` = sum(percentage == 1),
+                     total = dplyr::n()) %>%
+    dplyr::mutate(percentage = `perfect tracks` / total) %>%
     dplyr::arrange(Experiment)
+
+  return(res)
+}
+
+#' Score perfect tracks per well within an experiment.
+#'
+#' @export
+score_perfect_tracks_per_well <- function(d) {
+  # Some ObjectTrackID.x values are NA, meaning they were tracked automatically but not manually curated.
+  # These are treated as mismatches.
+  d <- d %>% assertr::verify(assertr::has_all_names("Experiment", "Well",
+                                                    "ObjectTrackID.x", "matched"))
+  tblExptWellObj <- d %>%
+    dplyr::group_by(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::summarize(matches = sum(matched, na.rm = TRUE),
+                     total = dplyr::n()) %>%
+    dplyr::mutate(percentage = matches / total) %>%
+    dplyr::arrange(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(errors = total - matches)
+
+  res <- tblExptWellObj %>%
+    dplyr::group_by(Experiment, Well) %>%
+    dplyr::summarize(`perfect tracks` = sum(percentage == 1), total = n()) %>%
+    dplyr::mutate(percentage  = `perfect tracks` / total) %>%
+    arrange(Experiment, Well)
 
   return(res)
 }
@@ -36,8 +68,9 @@ score_perfect_tracks <- function(d) {
 #'
 #' @return A data frame of censored well information.
 #' @export
-get_censored_wells <- function(id='syn11709601', ...) {
-  censored_wells <- readr::read_csv(synapser::synTableQuery(sprintf(query='select * from %s', id), ...)$filepath)
+get_censored_wells <- function(id = "syn11709601", ...) {
+  censored_wells <- readr::read_csv(synapser::synTableQuery(sprintf(query = "select * from %s", id), ...)$filepath)
+  return(censored_wells)
 }
 
 #' Identify object labels that are not present in image masks.
@@ -50,7 +83,8 @@ get_censored_wells <- function(id='syn11709601', ...) {
 #' @return A data frame summary of the objects not present.
 #' @export
 find_manual_errors <- function(experiment, objects_data_frame) {
-  orig <- objects_data_frame %>% dplyr::filter(Experiment == experiment$experiment)
+  orig <- objects_data_frame %>%
+    dplyr::filter(Experiment == experiment$experiment)
 
   f <- synapser::synGet(experiment$id)
   d <- readr::read_csv(f$path, col_types = readr::cols(.default = "c"))
@@ -64,8 +98,8 @@ find_manual_errors <- function(experiment, objects_data_frame) {
                   dplyr::one_of(manual_timepoint_columns))
 
   d3 <- d2 %>%
-    dplyr::mutate(TimePointCol=as.numeric(stringr::str_remove(TimePointCol, "T")),
-                  TimePointObject=as.numeric(TimePointObject)) %>%
+    dplyr::mutate(TimePointCol = as.numeric(stringr::str_remove(TimePointCol, "T")),
+                  TimePointObject = as.numeric(TimePointObject)) %>%
     dplyr::filter(Phenotype == "N") %>%
     dplyr::select(Sci_WellID, ObjectLabelsFound, Timepoint,
                   Time, TimePointCol, TimePointObject) %>%
@@ -73,16 +107,16 @@ find_manual_errors <- function(experiment, objects_data_frame) {
                   !(TimePointObject %in% c("U")))
 
   d4 <- dplyr::anti_join(d3, orig,
-                         by=c("Sci_WellID"="Well",
-                              "TimePointObject"="ObjectLabelsFound"))
+                         by = c("Sci_WellID" = "Well",
+                                "TimePointObject" = "ObjectLabelsFound"))
 
   d5 <- d4 %>%
-    dplyr::mutate(Experiment=experiment$experiment) %>%
+    dplyr::mutate(Experiment = experiment$experiment) %>%
     dplyr::select(Experiment,
-                  Well=Sci_WellID,
-                  ObjectLabelsFoundT0=ObjectLabelsFound,
-                  TimePointColFromSurvival=TimePointCol,
-                  ObjectLabelFromSurvival=TimePointObject) %>%
+                  Well = Sci_WellID,
+                  ObjectLabelsFoundT0 = ObjectLabelsFound,
+                  TimePointColFromSurvival = TimePointCol,
+                  ObjectLabelFromSurvival = TimePointObject) %>%
     dplyr::arrange(Well)
   d5
 }
