@@ -34,7 +34,7 @@ get_tracking_file_reader <- function(tracking_file_path) {
     tracking_file_reader$read <- neurolincsscoring::syn_get_tracking_submission_file
   } else {
     tracking_file_reader$isSynapseId <- FALSE
-    tracking_file_reader$read <- readr::read_csv
+    tracking_file_reader$read <- neurolincsscoring::read_tracking_submission_file
   }
   return(tracking_file_reader)
 }
