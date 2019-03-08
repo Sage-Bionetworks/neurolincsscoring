@@ -59,5 +59,7 @@ syn_get_tracking_submission_file <- function(id) {
 #' @export
 read_tracking_submission_file <- function(path) {
   trackingResults <- readr::read_csv(path, col_types = readr::cols()) %>%
+    dplyr::filter(!is.na(ObjectTrackID), !is.na(Experiment),
+                  !is.na(Well), !is.na(TimePoint))
   return(trackingResults)
 }
