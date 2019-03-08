@@ -77,8 +77,8 @@ read_curated_table <- function(curated_table_path, read) {
   return(curatedData)
 }
 
-cat_invalid_reasons <- function(invalid_reasons) {
-  cat(jsonlite::toJSON(list(
+output_invalid_reasons <- function(invalid_reasons) {
+  return(jsonlite::toJSON(list(
     status = "INVALID",
     invalid_reasons = invalid_reasons,
     results = NULL)))
@@ -108,7 +108,7 @@ score_tracking_results <- function(trackingResults, curatedData, per_well) {
     check_n_rows <- assertthat::assert_that(
       nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
   }
-  cat(jsonlite::toJSON(
+  return(jsonlite::toJSON(
     list(
       status = "SCORED",
       invalid_reasons = NULL,
@@ -126,23 +126,22 @@ main <- function() {
 
   trackingResults <- read_tracking_file(opt$tracking_file, tracking_file_reader$read)
   if (is.character(trackingResults)) { # returned invalid reason
-    cat_invalid_reasons(trackingResults)
-    return()
+    return(output_invalid_reasons(trackingResults))
   }
 
   curatedData <- read_curated_table(opt$curated_file, curated_file_reader$read)
   if (is.character(curatedData)) { # returned invalid reason
-    cat_invalid_reasons(curatedData)
-    return()
+    return(output_invalid_reasons(curatedData))
   }
 
   invalid_reasons <- neurolincsscoring::validate_tracking_results(
                          trackingResults, curatedData)
   if (length(invalid_reasons)) {
-    cat_invalid_reasons(invalid_reasons)
-    return()
+    return(output_invalid_reasons(invalid_reasons))
   }
-  score_tracking_results(trackingResults, curatedData, opt$per_well)
+  tracking_results_score <- score_tracking_results(
+    trackingResults, curatedData, opt$per_well)
+  return(tracking_results_score)
 }
 
 main()
