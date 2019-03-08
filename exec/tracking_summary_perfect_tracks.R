@@ -81,7 +81,8 @@ output_invalid_reasons <- function(invalid_reasons) {
   return(jsonlite::toJSON(list(
     status = "INVALID",
     invalid_reasons = invalid_reasons,
-    results = NULL)))
+    results = NULL),
+    auto_unbox = TRUE))
 }
 
 score_tracking_results <- function(trackingResults, curatedData, per_well) {
