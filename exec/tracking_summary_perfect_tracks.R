@@ -18,11 +18,17 @@ read_args <- function() {
                 help = "Path or ID containing curated data.",
                 dest = "curated_file",
                 default = "syn18344955"),
+    make_option(c("--only_tracked"), type = "logical",
+                action = "store_true",
+                help = "Only score submitted tracked objects seen at time 0.",
+                dest = "only_tracked",
+                default = FALSE),
     make_option(c("--per_well"), type = "logical",
                 action = "store_true",
                 help = "Report results per well instead of across all wells.",
                 dest = "per_well",
                 default = FALSE))
+
   opt <- parse_args(OptionParser(option_list = option_list))
   return(opt)
 }
@@ -81,7 +87,19 @@ cat_invalid_reasons <- function(invalid_reasons) {
   cat(jsonlite::toJSON(list(status = "INVALID", invalid_reasons = invalid_reasons)))
 }
 
-score_tracking_results <- function(trackingResults, curatedData, per_well) {
+score_tracking_results <- function(trackingResults, curatedData,
+                                   only_tracked = FALSE, per_well = FALSE) {
+
+  if (only_tracked) {
+    tracked_t0_objects <- trackingResults %>%
+      filter(TimePoint == 0) %>%
+      select(Experiment, Well, ObjectLabelsFound) %>%
+      distinct()
+
+    curatedData <- curatedData %>%
+      dplyr::left_join(., tracked_t0_objects)
+  }
+
   curatedData <- curatedData %>%
     dplyr::filter(Experiment %in% unique(trackingResults$Experiment))
   message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
@@ -139,7 +157,10 @@ main <- function() {
     cat_invalid_reasons(invalid_reasons)
     return()
   }
-  score_tracking_results(trackingResults, curatedData, opt$per_well)
+  score_tracking_results(trackingResults = trackingResults,
+                         curatedData = curatedData,
+                         only_tracked = opt$only_tracked,
+                         per_well = opt$per_well)
 }
 
 main()
