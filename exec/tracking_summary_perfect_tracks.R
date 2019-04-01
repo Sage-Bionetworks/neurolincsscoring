@@ -97,7 +97,7 @@ score_tracking_results <- function(trackingResults, curatedData,
       distinct()
 
     curatedData <- curatedData %>%
-      dplyr::left_join(., tracked_t0_objects)
+      dplyr::semi_join(., tracked_t0_objects)
   }
 
   curatedData <- curatedData %>%
