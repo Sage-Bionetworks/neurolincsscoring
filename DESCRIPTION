@@ -1,6 +1,6 @@
 Package: neurolincsscoring
 Title: Score Tracking Against Curated NeuroLINCS Data
-Version: 0.0.0.9000
+Version: 0.2
 Authors@R: 
     person(given = "Kenneth",
            family = "Daily",
