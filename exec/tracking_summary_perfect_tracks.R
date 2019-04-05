@@ -100,11 +100,12 @@ score_tracking_results <- function(trackingResults, curatedData,
       dplyr::semi_join(., tracked_t0_objects)
   }
 
-  curatedData <- curatedData %>%
-    dplyr::filter(Experiment %in% unique(trackingResults$Experiment))
+  curatedDataRelevant <- curatedData %>%
+    filter(!is.na(ObjectLabelsFound),
+           Experiment %in% unique(trackingResults$Experiment))
   message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
   message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
-  merged <- dplyr::full_join(curatedData,
+  merged <- dplyr::left_join(curatedDataRelevant,
                              trackingResults,
                              by = c("Experiment" = "Experiment",
                                     "Well" = "Well",
