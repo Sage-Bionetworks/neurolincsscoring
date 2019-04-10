@@ -28,11 +28,9 @@ read_args <- function() {
                 help = "Report results per well instead of across all wells.",
                 dest = "per_well",
                 default = FALSE),
-    make_option(c("--write_output_to_file"), type = "logical",
-                action = "store_true",
-                help = "Write output to result.json",
-                dest = "write_output_to_file",
-                default = FALSE))
+    make_option(c("--write_output_to_file"), type = "character",
+                help = "Write output to a specific path. Defaults to not writing output.",
+                dest = "write_output_to_file"))
 
   opt <- parse_args(OptionParser(option_list = option_list))
   return(opt)
@@ -88,18 +86,18 @@ read_curated_table <- function(curated_table_path, read) {
   return(curatedData)
 }
 
-cat_invalid_reasons <- function(invalid_reasons, write_output_to_file) {
+cat_invalid_reasons <- function(invalid_reasons, write_output_to_file = NULL) {
   result <- list(status = "INVALID",
                  invalid_reasons = invalid_reasons)
-  if (write_output_to_file) {
-    jsonlite::write_json(result, "result.json", auto_unbox = TRUE)
+  if (is.character(write_output_to_file)) {
+    jsonlite::write_json(result, write_output_to_file, auto_unbox = TRUE)
   }
   cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
 
 score_tracking_results <- function(trackingResults, curatedData,
                                    only_tracked = FALSE, per_well = FALSE,
-                                   write_output_to_file = FALSE) {
+                                   write_output_to_file = NULL) {
 
   if (only_tracked) {
     tracked_t0_objects <- trackingResults %>%
@@ -139,8 +137,8 @@ score_tracking_results <- function(trackingResults, curatedData,
       status = "SCORED",
       invalid_reasons = NULL,
       results = as.list(res))
-  if (write_output_to_file) {
-    jsonlite::write_json(result, "result.json", auto_unbox = TRUE)
+  if (is.character(write_output_to_file)) {
+    jsonlite::write_json(result, write_output_to_file, auto_unbox = TRUE)
   }
   cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
