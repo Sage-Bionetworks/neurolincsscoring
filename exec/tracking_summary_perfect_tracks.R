@@ -27,6 +27,11 @@ read_args <- function() {
                 action = "store_true",
                 help = "Report results per well instead of across all wells.",
                 dest = "per_well",
+                default = FALSE),
+    make_option(c("--write_output_to_file"), type = "logical",
+                action = "store_true",
+                help = "Write output to result.json",
+                dest = "write_output_to_file",
                 default = FALSE))
 
   opt <- parse_args(OptionParser(option_list = option_list))
@@ -83,12 +88,18 @@ read_curated_table <- function(curated_table_path, read) {
   return(curatedData)
 }
 
-cat_invalid_reasons <- function(invalid_reasons) {
-  cat(jsonlite::toJSON(list(status = "INVALID", invalid_reasons = invalid_reasons)))
+cat_invalid_reasons <- function(invalid_reasons, write_output_to_file) {
+  result <- list(status = "INVALID",
+                 invalid_reasons = invalid_reasons)
+  if (write_output_to_file) {
+    jsonlite::write_json(result, "result.json", auto_unbox = TRUE)
+  }
+  cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
 
 score_tracking_results <- function(trackingResults, curatedData,
-                                   only_tracked = FALSE, per_well = FALSE) {
+                                   only_tracked = FALSE, per_well = FALSE,
+                                   write_output_to_file = FALSE) {
 
   if (only_tracked) {
     tracked_t0_objects <- trackingResults %>%
@@ -124,12 +135,14 @@ score_tracking_results <- function(trackingResults, curatedData,
     check_n_rows <- assertthat::assert_that(
       nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
   }
-  cat(jsonlite::toJSON(
-    list(
+  result <- list(
       status = "SCORED",
       invalid_reasons = NULL,
-      results = as.list(res)),
-    auto_unbox = TRUE))
+      results = as.list(res))
+  if (write_output_to_file) {
+    jsonlite::write_json(result, "result.json", auto_unbox = TRUE)
+  }
+  cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
 
 main <- function() {
@@ -142,26 +155,27 @@ main <- function() {
 
   trackingResults <- read_tracking_file(opt$tracking_file, tracking_file_reader$read)
   if (is.character(trackingResults)) { # returned invalid reason
-    cat_invalid_reasons(trackingResults)
+    cat_invalid_reasons(trackingResults, opt$write_output_to_file)
     return()
   }
 
   curatedData <- read_curated_table(opt$curated_file, curated_file_reader$read)
   if (is.character(curatedData)) { # returned invalid reason
-    cat_invalid_reasons(curatedData)
+    cat_invalid_reasons(curatedData, opt$write_output_to_file)
     return()
   }
 
   invalid_reasons <- neurolincsscoring::validate_tracking_results(
                          trackingResults, curatedData)
   if (length(invalid_reasons)) {
-    cat_invalid_reasons(invalid_reasons)
+    cat_invalid_reasons(invalid_reasons, opt$write_output_to_file)
     return()
   }
   score_tracking_results(trackingResults = trackingResults,
                          curatedData = curatedData,
                          only_tracked = opt$only_tracked,
-                         per_well = opt$per_well)
+                         per_well = opt$per_well,
+                         write_output_to_file = opt$write_output_to_file)
 }
 
 main()
