@@ -17,7 +17,7 @@ read_args <- function() {
     make_option(c("--curated_data_table"), type = "character",
                 help = "Path or ID containing curated data.",
                 dest = "curated_file",
-                default = "syn18344955"),
+                default = "syn18411380"),
     make_option(c("--per_well"), type = "logical",
                 action = "store_true",
                 help = "Report results per well instead of across all wells.",
