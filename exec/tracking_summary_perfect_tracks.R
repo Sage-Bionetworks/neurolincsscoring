@@ -18,11 +18,20 @@ read_args <- function() {
                 help = "Path or ID containing curated data.",
                 dest = "curated_file",
                 default = "syn18344955"),
+    make_option(c("--only_tracked"), type = "logical",
+                action = "store_true",
+                help = "Only score submitted tracked objects seen at time 0.",
+                dest = "only_tracked",
+                default = FALSE),
     make_option(c("--per_well"), type = "logical",
                 action = "store_true",
                 help = "Report results per well instead of across all wells.",
                 dest = "per_well",
-                default = FALSE))
+                default = FALSE),
+    make_option(c("--write_output_to_file"), type = "character",
+                help = "Write output to a specific path. Defaults to not writing output.",
+                dest = "write_output_to_file"))
+
   opt <- parse_args(OptionParser(option_list = option_list))
   return(opt)
 }
@@ -77,16 +86,35 @@ read_curated_table <- function(curated_table_path, read) {
   return(curatedData)
 }
 
-cat_invalid_reasons <- function(invalid_reasons) {
-  cat(jsonlite::toJSON(list(status = "INVALID", invalid_reasons = invalid_reasons)))
+cat_invalid_reasons <- function(invalid_reasons, write_output_to_file = NULL) {
+  result <- list(status = "INVALID",
+                 invalid_reasons = invalid_reasons)
+  if (is.character(write_output_to_file)) {
+    jsonlite::write_json(result, write_output_to_file, auto_unbox = TRUE)
+  }
+  cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
 
-score_tracking_results <- function(trackingResults, curatedData, per_well) {
-  curatedData <- curatedData %>%
-    dplyr::filter(Experiment %in% unique(trackingResults$Experiment))
+score_tracking_results <- function(trackingResults, curatedData,
+                                   only_tracked = FALSE, per_well = FALSE,
+                                   write_output_to_file = NULL) {
+
+  if (only_tracked) {
+    tracked_t0_objects <- trackingResults %>%
+      filter(TimePoint == 0) %>%
+      select(Experiment, Well, ObjectLabelsFound) %>%
+      distinct()
+
+    curatedData <- curatedData %>%
+      dplyr::semi_join(., tracked_t0_objects)
+  }
+
+  curatedDataRelevant <- curatedData %>%
+    filter(!is.na(ObjectLabelsFound),
+           Experiment %in% unique(trackingResults$Experiment))
   message(sprintf("Curated data has %s rows\n", nrow(curatedData)))
   message(sprintf("Tracking submission has %s rows\n", nrow(trackingResults)))
-  merged <- dplyr::full_join(curatedData,
+  merged <- dplyr::left_join(curatedDataRelevant,
                              trackingResults,
                              by = c("Experiment" = "Experiment",
                                     "Well" = "Well",
@@ -105,12 +133,14 @@ score_tracking_results <- function(trackingResults, curatedData, per_well) {
     check_n_rows <- assertthat::assert_that(
       nrow(res) == 1, msg = "Number of rows in result is not equal to 1.")
   }
-  cat(jsonlite::toJSON(
-    list(
+  result <- list(
       status = "SCORED",
       invalid_reasons = NULL,
-      results = as.list(res)),
-    auto_unbox = TRUE))
+      results = as.list(res))
+  if (is.character(write_output_to_file)) {
+    jsonlite::write_json(result, write_output_to_file, auto_unbox = TRUE)
+  }
+  cat(jsonlite::toJSON(result, auto_unbox = TRUE))
 }
 
 main <- function() {
@@ -123,23 +153,27 @@ main <- function() {
 
   trackingResults <- read_tracking_file(opt$tracking_file, tracking_file_reader$read)
   if (is.character(trackingResults)) { # returned invalid reason
-    cat_invalid_reasons(trackingResults)
+    cat_invalid_reasons(trackingResults, opt$write_output_to_file)
     return()
   }
 
   curatedData <- read_curated_table(opt$curated_file, curated_file_reader$read)
   if (is.character(curatedData)) { # returned invalid reason
-    cat_invalid_reasons(curatedData)
+    cat_invalid_reasons(curatedData, opt$write_output_to_file)
     return()
   }
 
   invalid_reasons <- neurolincsscoring::validate_tracking_results(
                          trackingResults, curatedData)
   if (length(invalid_reasons)) {
-    cat_invalid_reasons(invalid_reasons)
+    cat_invalid_reasons(invalid_reasons, opt$write_output_to_file)
     return()
   }
-  score_tracking_results(trackingResults, curatedData, opt$per_well)
+  score_tracking_results(trackingResults = trackingResults,
+                         curatedData = curatedData,
+                         only_tracked = opt$only_tracked,
+                         per_well = opt$per_well,
+                         write_output_to_file = opt$write_output_to_file)
 }
 
 main()
