@@ -165,9 +165,11 @@ main <- function() {
   if (length(invalid_reasons)) {
     return(output_invalid_reasons(invalid_reasons))
   }
-  tracking_results_score <- score_tracking_results(
-    trackingResults, curatedData, opt$per_well)
-  return(tracking_results_score)
+  score_tracking_results(trackingResults = trackingResults,
+                         curatedData = curatedData,
+                         only_tracked = opt$only_tracked,
+                         per_well = opt$per_well,
+                         write_output_to_file = opt$write_output_to_file)
 }
 
 main()
