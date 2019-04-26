@@ -43,7 +43,7 @@ get_tracking_file_reader <- function(tracking_file_path) {
     tracking_file_reader$read <- neurolincsscoring::syn_get_tracking_submission_file
   } else {
     tracking_file_reader$isSynapseId <- FALSE
-    tracking_file_reader$read <- readr::read_csv
+    tracking_file_reader$read <- neurolincsscoring::read_tracking_submission_file
   }
   return(tracking_file_reader)
 }
@@ -86,13 +86,12 @@ read_curated_table <- function(curated_table_path, read) {
   return(curatedData)
 }
 
-cat_invalid_reasons <- function(invalid_reasons, write_output_to_file = NULL) {
-  result <- list(status = "INVALID",
-                 invalid_reasons = invalid_reasons)
-  if (is.character(write_output_to_file)) {
-    jsonlite::write_json(result, write_output_to_file, auto_unbox = TRUE)
-  }
-  cat(jsonlite::toJSON(result, auto_unbox = TRUE))
+output_invalid_reasons <- function(invalid_reasons) {
+  return(jsonlite::toJSON(list(
+    status = "INVALID",
+    invalid_reasons = invalid_reasons,
+    results = NULL),
+    auto_unbox = TRUE))
 }
 
 score_tracking_results <- function(trackingResults, curatedData,
@@ -153,27 +152,22 @@ main <- function() {
 
   trackingResults <- read_tracking_file(opt$tracking_file, tracking_file_reader$read)
   if (is.character(trackingResults)) { # returned invalid reason
-    cat_invalid_reasons(trackingResults, opt$write_output_to_file)
-    return()
+    return(output_invalid_reasons(trackingResults))
   }
 
   curatedData <- read_curated_table(opt$curated_file, curated_file_reader$read)
   if (is.character(curatedData)) { # returned invalid reason
-    cat_invalid_reasons(curatedData, opt$write_output_to_file)
-    return()
+    return(output_invalid_reasons(curatedData))
   }
 
   invalid_reasons <- neurolincsscoring::validate_tracking_results(
                          trackingResults, curatedData)
   if (length(invalid_reasons)) {
-    cat_invalid_reasons(invalid_reasons, opt$write_output_to_file)
-    return()
+    return(output_invalid_reasons(invalid_reasons))
   }
-  score_tracking_results(trackingResults = trackingResults,
-                         curatedData = curatedData,
-                         only_tracked = opt$only_tracked,
-                         per_well = opt$per_well,
-                         write_output_to_file = opt$write_output_to_file)
+  tracking_results_score <- score_tracking_results(
+    trackingResults, curatedData, opt$per_well)
+  return(tracking_results_score)
 }
 
 main()
