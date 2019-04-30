@@ -61,6 +61,31 @@ score_perfect_tracks_per_well <- function(d) {
   return(res)
 }
 
+score_perfect_tracks_per_object <- function(d) {
+  # Some ObjectTrackID.x values are NA, meaning they were tracked automatically
+  # but not manually curated. These are treated as mismatches.
+  d <- d %>% assertr::verify(assertr::has_all_names("Experiment", "Well",
+                                                    "ObjectTrackID.x", "matched"))
+  tblExptWellObj <- d %>%
+    dplyr::group_by(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::summarize(matches = sum(matched, na.rm = TRUE),
+                     total = dplyr::n()) %>%
+    dplyr::mutate(percentage = matches / total) %>%
+    dplyr::arrange(Experiment, Well, ObjectTrackID.x) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(errors = total - matches)
+
+  res <- tblExptWellObj %>%
+    dplyr::group_by(Experiment, ObjectTrackID.x) %>%
+    dplyr::summarize(`perfect tracks` = sum(percentage == 1), total = n()) %>%
+    dplyr::mutate(percentage  = `perfect tracks` / total) %>%
+    dplyr::ungroup() %>%
+    dplyr::rename(ObjectTrackID = ObjectTrackID.x) %>%
+    arrange(Experiment, ObjectTrackID)
+
+  return(res)
+}
+
 #' Get censored wells from the censored well table.
 #'
 #' @param id Synapse ID of a censored well table.

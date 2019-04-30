@@ -28,6 +28,11 @@ read_args <- function() {
                 help = "Report results per well instead of across all wells.",
                 dest = "per_well",
                 default = FALSE),
+    make_option(c("--per_object"), type = "logical",
+                action = "store_true",
+                help = "Report results per object instead of across all objects.",
+                dest = "per_object",
+                default = FALSE),
     make_option(c("--write_output_to_file"), type = "character",
                 help = "Write output to a specific path. Defaults to not writing output.",
                 dest = "write_output_to_file"))
@@ -96,8 +101,7 @@ output_invalid_reasons <- function(invalid_reasons) {
 
 score_tracking_results <- function(trackingResults, curatedData,
                                    only_tracked = FALSE, per_well = FALSE,
-                                   write_output_to_file = NULL) {
-
+                                   per_object = FALSE, write_output_to_file = NULL) {
   if (only_tracked) {
     tracked_t0_objects <- trackingResults %>%
       filter(TimePoint == 0) %>%
@@ -125,7 +129,9 @@ score_tracking_results <- function(trackingResults, curatedData,
 
   merged$matched[is.na(merged$matched)] <- FALSE
 
-  if (per_well) {
+  if (per_object) {
+    res <- neurolincsscoring::score_perfect_tracks_per_object(merged)
+  } else if (per_well) {
     res <- neurolincsscoring::score_perfect_tracks_per_well(merged)
   } else {
     res <- neurolincsscoring::score_perfect_tracks(merged)
@@ -169,6 +175,7 @@ main <- function() {
                          curatedData = curatedData,
                          only_tracked = opt$only_tracked,
                          per_well = opt$per_well,
+                         per_object = opt$per_object,
                          write_output_to_file = opt$write_output_to_file)
 }
 
