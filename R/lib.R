@@ -76,7 +76,7 @@ score_perfect_tracks_per_object <- function(d) {
     dplyr::mutate(errors = total - matches)
 
   res <- tblExptWellObj %>%
-    dplyr::group_by(Experiment, ObjectTrackID.x) %>%
+    dplyr::group_by(Experiment, Well, ObjectTrackID.x) %>%
     dplyr::summarize(`perfect tracks` = sum(percentage == 1), total = n()) %>%
     dplyr::mutate(percentage  = `perfect tracks` / total) %>%
     dplyr::ungroup() %>%
